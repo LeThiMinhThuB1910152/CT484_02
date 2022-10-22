@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myshop/ui/products/user_products_screen.dart';
-
-/* import 'ui/products/products_manager.dart';
-import 'ui/products/product_detail_screen.dart';
-import 'ui/products/products_overview_screen.dart';
-import 'ui/cart/cart_screen.dart';
-import 'ui/orders/orders_screen.dart'; */
+import 'package:provider/provider.dart';
 
 import 'ui/screens.dart';
 
@@ -18,69 +13,43 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'My Shop',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'Lato',
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.purple,
-        ).copyWith(
-          secondary: Colors.deepOrange,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (ctx) => ProductsManager(),
         ),
+      ],
+      child: MaterialApp(
+        title: 'My Shop',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          fontFamily: 'Lato',
+          colorScheme: ColorScheme.fromSwatch(
+            primarySwatch: Colors.purple,
+          ).copyWith(
+            secondary: Colors.deepOrange,
+          ),
+        ),
+        home: const ProductsOverviewScreen(),
+        routes: {
+          CartScreen.routeName: (ctx) => const CartScreen(),
+          OrdersScreen.routeName: (ctx) => const OrdersScreen(),
+          UserProductsScreen.routeName: (ctx) => const UserProductsScreen(),
+        },
+        onGenerateRoute: (settings) {
+          if (settings.name == ProductDetailScreen.routeName) {
+            final productId = settings.arguments as String;
+            return MaterialPageRoute(
+              builder: (ctx) {
+                return ProductDetailScreen(
+                  ctx.read<ProductsManager>().findById(productId),
+                );
+              },
+            );
+          }
+          return null;
+        },
       ),
-
-      /* //Bước 1 Lab 1
-      home: Container(        
-        color: Colors.green,
-      ), */
-
-      /* //Bước 2 Lab 1
-      home: SafeArea(
-        child: ProductDetailScreen(
-          ProductsManager().items[0],
-        ),
-      ), */
-
-      /* //Bước 3 Lab 1
-      home: const SafeArea(
-        child: ProductsOverviewScreen(),
-      ), */
-
-      /* //Bước 4 Lab 1
-      home: const SafeArea(
-        child: UserProductsScreen(),
-      ), */
-
-      /* //Bước 1 Lab 2
-      home: const SafeArea(
-        child: CartScreen(),
-      ), */
-
-      /* //Bước 2 Lab 2
-      home: const SafeArea(
-        child: OrdersScreen(),
-      ), */
-
-      home: const ProductsOverviewScreen(),
-      routes: {
-        CartScreen.routeName: (ctx) => const CartScreen(),
-        OrdersScreen.routeName: (ctx) => const OrdersScreen(),
-        UserProductsScreen.routeName: (ctx) => const UserProductsScreen(),
-      },
-      onGenerateRoute: (settings) {
-        if (settings.name == ProductDetailScreen.routeName) {
-          final productId = settings.arguments as String;
-          return MaterialPageRoute(
-            builder: (ctx) {
-              return ProductDetailScreen(
-                ProductsManager().findById(productId),
-              );
-            },
-          );
-        }
-        return null;
-      },
     );
   }
 }
