@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
+import 'package:myshop/models/auth_token.dart';
+import 'package:myshop/services/products_service.dart';
 import '../../models/product.dart';
 
 class ProductsManager with ChangeNotifier {
-  final List<Product> _items = [
-    Product(
+  List<Product> _items = [
+/*     Product(
       id: 'p1',
       title: 'Red Shirt',
       description: 'A red shirt - it is pretty red!',
@@ -37,7 +39,30 @@ class ProductsManager with ChangeNotifier {
           'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
       isFavorite: true,
     ),
+    */
   ];
+
+  final ProductsService _productsService;
+
+  ProductsManager([AuthToken? authToken])
+      : _productsService = ProductsService(authToken);
+
+  set authToken(AuthToken? authToken) {
+    _productsService.authToken = authToken;
+  }
+
+  Future<void> fetchProducts([bool filterByUser = false]) async {
+    _items = await _productsService.fetchProducts(filterByUser);
+    notifyListeners();
+  }
+
+  Future<void> addProduct(Product product) async {
+    final newProduct = await _productsService.addProduct(product);
+    if (newProduct != null) {
+      _items.add(newProduct);
+      notifyListeners();
+    }
+  }
 
   int get itemCount {
     return _items.length;
@@ -55,14 +80,14 @@ class ProductsManager with ChangeNotifier {
     return _items.firstWhere((prod) => prod.id == id);
   }
 
-  void addProduct(Product product) {
+  /* void addProduct(Product product) {
     _items.add(
       product.copyWith(
         id: 'p${DateTime.now().toIso8601String()}',
       ),
     );
     notifyListeners();
-  }
+  }  */
 
   void updateProduct(Product product) {
     final index = _items.indexWhere((item) => item.id == product.id);
